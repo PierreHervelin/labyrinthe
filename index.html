@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <link rel="stylesheet" href="./index.css">
     <title>Document</title>
 </head>
 <body>
+
     <canvas id="map" width="840" height="680"></canvas>
+    <img src="scraps_bricks.png" id="bricks">
+
+
     <script src="js/fonctions.js"></script>
     <script src="js/mapgeneration.js"></script>
     <script>
@@ -17,11 +21,17 @@
         var map=new Map([21,17]);
         pos=[0,0]
 
+        
+       
+
         for(var i in map.getMap()){
             for(var j in map.getMap()[i]){
                 var ctx=canvas.getContext("2d");
-                if(map.getMap()[i][j]==-1){
-                    ctx.fillStyle = "black";
+                var brique=document.getElementById("bricks");
+                var pattern = ctx.createPattern(brique, "repeat");
+                if(map.getMap()[i][j]==-1){ 
+                    ctx.fillStyle = "#774F7F";
+                    ctx.fillStyle =pattern;
                 }else{
                     ctx.fillStyle = "white";
                 }

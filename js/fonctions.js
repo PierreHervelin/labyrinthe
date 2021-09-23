@@ -27,3 +27,4 @@ function getRandomIntPaire(min, max) {
     }
     return val
 }
+
