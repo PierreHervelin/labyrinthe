@@ -9,29 +9,14 @@
 </head>
 <body>
     <canvas id="map" width="840" height="680"></canvas>
+    <img src="IMG/robot.png" alt="" id="robot" style="display: none;">
     <script src="js/fonctions.js"></script>
     <script src="js/mapgeneration.js"></script>
+    <script src="js/gameloop.js"></script>
     <script>
-        var canvas=document.getElementById('map');
-
-        var map=new Map([21,17]);
-        pos=[0,0]
-
-        for(var i in map.getMap()){
-            for(var j in map.getMap()[i]){
-                var ctx=canvas.getContext("2d");
-                if(map.getMap()[i][j]==-1){
-                    ctx.fillStyle = "black";
-                }else{
-                    ctx.fillStyle = "white";
-                }
-                ctx.fillRect(pos[0], pos[1], 40, 40);
-                pos[0]+=40;
-            }
-            pos[1]+=40;
-            pos[0]=0;
-        }
-
+        setInterval(loop,1000/30);
+        var robot1Move=setInterval(()=>{robotAI(robot1,robot2)},robot1.speed*1000);
+        var robot2Move=setInterval(()=>{robotAI(robot2,robot1)},robot2.speed*1000);
     </script>
 </body>
 </html>

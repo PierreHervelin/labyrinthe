@@ -44,7 +44,6 @@ class Map{
                 2:bottom
                 3:left
                 */
-            console.log(this.spawns);
             if(i==0){
                 pick.push(getRandomInt(0,3));
             }
@@ -136,6 +135,16 @@ class Map{
         }
         return murs;
     }
+    getFastRoad(){
+        for(var i in this.map){
+            for(var j in this.map[i]){
+                if(this.map[i][j]>=0){
+                    this.map[i][j]=0;
+                }
+            }
+        }
+        var distance=1;
+    }
     
     printMap(val){
         console.log('=====MAP=====');
@@ -155,12 +164,117 @@ class Map{
     
 
 }
-/*
-class Case{
-    #top=true;
-    #left=true;
-    #right=true;
-    #bottom=true;
-    constructor()
+
+class Robot{
+    health=10.0;
+    damage=0.5;
+    speed=0.5;
+    attack_speed=0.8;
+    hand=undefined;
+    body=undefined;
+    pos;
+    map;
+    direction;
+    constructor(map,id){
+        this.map=map
+        this.pos=this.map.spawns[id];
+        console.log('[constructor Robot]:robot créé');
+    }
+    move(direction){
+        var x=this.pos[1],
+            y=this.pos[0];
+        switch (direction) {
+            case 'left':
+                if(this.pos[1]-1!=-1 && this.map.getMap()[y][x-1]!=-1){
+                    this.pos[1]-=1;
+                }else{
+                    return -1;
+                }
+                break;
+            case 'right':
+                if(this.pos[1]+1!=this.map.size[0] && this.map.getMap()[y][x+1]!=-1){
+                    this.pos[1]+=1;
+                }else{
+                    return -1;
+                }
+                break;
+            case 'top':
+                if(this.pos[0]-1!=-1 && this.map.getMap()[y-1][x]!=-1){
+                    this.pos[0]-=1;
+                }else{
+                    return -1;
+                }
+                break;
+            case 'bottom':
+                if(this.pos[0]+1!=this.map.size[1] && this.map.getMap()[y+1][x]!=-1){
+                    this.pos[0]+=1;
+                }else{
+                    return -1;
+                }
+                break;
+            default:
+                console.log('[Robot.move()]:direction inconnu');
+                break;
+        }
+    }
+    getFastRoad(cible){
+        for(var i in this.map){
+            for(var j in this.map[i]){
+                if(this.map[i][j]>=0){
+                    this.map[i][j]=0;
+                }
+            }
+        }
+        var distance=1;
+
+        
+
+    }
+
 }
-*/
+
+class Arme{
+    damage;
+    durability;
+    speed;
+    constructor(type){
+        switch (type) {
+            case 'epee_bois':
+                this.epee_bois();
+                break;
+            case 'epee_pierre':
+                this.epee_pierre();
+                break;
+            case 'epee_fer':
+                this.epee_fer();
+                break;
+            default:
+                console.log('arme inconnu');
+                break;
+        }
+    }
+    epee_bois(){
+        this.damage=1;
+        this.durability=4;
+        this.speed=1.2;
+    }
+    epee_pierre(){
+        this.damage=2;
+        this.durability=6;
+        this.speed=1.5;
+    }
+    epee_fer(){
+        this.damage=3.5;
+        this.durability=6;
+        this.speed=1.8;
+    }
+    getDamage(){
+        return this.damage
+    }
+    getDurability(){
+        return this.durability
+    }
+    getSpeed(){
+        return this.speed
+    }
+}
