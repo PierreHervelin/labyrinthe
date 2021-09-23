@@ -10,7 +10,8 @@
 <body>
 
     <canvas id="map" width="840" height="680"></canvas>
-    <img src="scraps_bricks.png" id="bricks">
+    <img src="./textures/bricksx64 (1).png" id="murs">
+    <img src="./textures/dirt (1).png" id="sols">
 
 
     <script src="js/fonctions.js"></script>
@@ -27,13 +28,14 @@
         for(var i in map.getMap()){
             for(var j in map.getMap()[i]){
                 var ctx=canvas.getContext("2d");
-                var brique=document.getElementById("bricks");
-                var pattern = ctx.createPattern(brique, "repeat");
+                var murs=document.getElementById("murs");
+                var murPattern = ctx.createPattern(murs, "repeat");
+                var sols=document.getElementById("sols");
+                var solPattern = ctx.createPattern(sols, "repeat");
                 if(map.getMap()[i][j]==-1){ 
-                    ctx.fillStyle = "#774F7F";
-                    ctx.fillStyle =pattern;
+                    ctx.fillStyle =murPattern;
                 }else{
-                    ctx.fillStyle = "white";
+                    ctx.fillStyle = solPattern;
                 }
                 ctx.fillRect(pos[0], pos[1], 40, 40);
                 pos[0]+=40;
