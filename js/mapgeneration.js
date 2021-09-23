@@ -1,5 +1,5 @@
 class Map{
-    #size=[10,10];
+    #size=[];
     #map=[];
     #spawns=[[],[]];
     constructor(size){
@@ -9,7 +9,15 @@ class Map{
         }
         this.#size=size;
         this.#map=new Array(this.#size[0]);
-        this.#init()
+
+        this.#init();
+        while(this.getMurs()<(
+            (this.#size[0]+this.#size[1]-1)*2-2)
+            +(((this.#size[0]-1)/2)-1)*((this.#size[1]/2)-2)+this.#size[0]*2
+            ){
+                this.#map=new Array(this.#size[0]);
+                this.#init();
+            }
     }
     #init(){
         //INIT GRILLES : attention Y doit être impaire
@@ -27,6 +35,7 @@ class Map{
                 }
             }
         }
+        var pick=[];
         for(var i=0;i<2;i++){
             //INIT SPAWNS :
                 /*
@@ -36,24 +45,25 @@ class Map{
                 3:left
                 */
             console.log(this.#spawns);
-            if(i==1){
-                var pick2=getRandomInt(0,3,pick);
-                pick=pick2;
-            }else{
-                var pick=getRandomInt(0,3);
+            if(i==0){
+                pick.push(getRandomInt(0,3));
             }
-            switch (pick) {
+            switch (pick[i]) {
                 case 0:
-                    this.#spawns[i]=[getRandomIntImpaire(0,this.#size[1]),0];
+                    this.#spawns[i]=[0,getRandomIntImpaire(1,this.#size[0]-2)];
+                    pick[1]=2;
                     break;
                 case 1:
-                    this.#spawns[i]=[this.#size[1]-1,getRandomIntImpaire(0,this.#size[0])];
+                    this.#spawns[i]=[getRandomIntImpaire(1,this.#size[1]-2),this.#size[0]-1];
+                    pick[1]=3;
                     break;
                 case 2:
-                    this.#spawns[i]=[0,getRandomIntImpaire(0,this.#size[0])];
+                    this.#spawns[i]=[this.#size[1]-1,getRandomIntImpaire(1,this.#size[0]-2)];
+                    pick[1]=0;
                     break;
                 case 3:
-                    this.#spawns[i]=[getRandomIntImpaire(0,this.#size[1]),this.#size[0]-1];
+                    this.#spawns[i]=[getRandomIntImpaire(1,this.#size[1]-2),0];
+                    pick[1]=1;
                     break;
                 default:
                     break;
@@ -63,7 +73,7 @@ class Map{
         var nb=0;
         for(var i in this.#map){
             for(var j in this.#map[i]){
-                if(this.#map[i][j]==1){
+                if(this.#map[i][j]!=-1){
                     nb++;
                     this.#map[i][j]=nb;
                 }
@@ -111,6 +121,20 @@ class Map{
             }
         }
         return true;
+    }
+    getMap(){
+        return this.#map;
+    }
+    getMurs(){
+        var murs=0;
+        for(var i in this.#map){
+            for(var j in this.#map[i]){
+                if(this.#map[i][j]==-1){
+                    murs++;
+                }
+            }
+        }
+        return murs;
     }
     
     printMap(val){

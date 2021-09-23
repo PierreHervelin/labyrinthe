@@ -5,12 +5,33 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script src="js/fonctions.js" defer></script>
-    <script src="js/mapgeneration.js" defer></script>
-
     <title>Document</title>
 </head>
 <body>
-    
+    <canvas id="map" width="840" height="680"></canvas>
+    <script src="js/fonctions.js"></script>
+    <script src="js/mapgeneration.js"></script>
+    <script>
+        var canvas=document.getElementById('map');
+
+        var map=new Map([21,17]);
+        pos=[0,0]
+
+        for(var i in map.getMap()){
+            for(var j in map.getMap()[i]){
+                var ctx=canvas.getContext("2d");
+                if(map.getMap()[i][j]==-1){
+                    ctx.fillStyle = "black";
+                }else{
+                    ctx.fillStyle = "white";
+                }
+                ctx.fillRect(pos[0], pos[1], 40, 40);
+                pos[0]+=40;
+            }
+            pos[1]+=40;
+            pos[0]=0;
+        }
+
+    </script>
 </body>
 </html>
