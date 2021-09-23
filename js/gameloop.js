@@ -19,7 +19,7 @@ function loop() {
             }
             ctx.fillRect(pos[0], pos[1], 40, 40);
             ctx.fillStyle = "black";
-            ctx.strokeText(map.getMap()[i][j],pos[0]+20,pos[1]+20);
+            ctx.strokeText(robot1.map.map[i][j],pos[0]+20,pos[1]+20);
             pos[0]+=40;
         }
         pos[1]+=40;
@@ -32,12 +32,6 @@ function loop() {
 }
 
 function robotAI(robot,cible) {
-    var directions=['top','left','right','bottom'],
-        pick=getRandomInt(0,3);
-
-    
-    
-    while(robot.move(directions[pick])){
-        pick=getRandomInt(0,3);
-    }
+    var move=robot.getFastRoad([cible.pos[0],cible.pos[1]]);
+    robot.move(move[move.length-1]);
 }

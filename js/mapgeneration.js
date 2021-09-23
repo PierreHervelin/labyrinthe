@@ -49,19 +49,19 @@ class Map{
             }
             switch (pick[i]) {
                 case 0:
-                    this.spawns[i]=[0,getRandomIntImpaire(1,this.size[0]-2)];
+                    this.spawns[i]=[1,getRandomIntImpaire(1,this.size[0]-2)];
                     pick[1]=2;
                     break;
                 case 1:
-                    this.spawns[i]=[getRandomIntImpaire(1,this.size[1]-2),this.size[0]-1];
+                    this.spawns[i]=[getRandomIntImpaire(1,this.size[1]-2),this.size[0]-2];
                     pick[1]=3;
                     break;
                 case 2:
-                    this.spawns[i]=[this.size[1]-1,getRandomIntImpaire(1,this.size[0]-2)];
+                    this.spawns[i]=[this.size[1]-2,getRandomIntImpaire(1,this.size[0]-2)];
                     pick[1]=0;
                     break;
                 case 3:
-                    this.spawns[i]=[getRandomIntImpaire(1,this.size[1]-2),0];
+                    this.spawns[i]=[getRandomIntImpaire(1,this.size[1]-2),1];
                     pick[1]=1;
                     break;
                 default:
@@ -135,16 +135,6 @@ class Map{
         }
         return murs;
     }
-    getFastRoad(){
-        for(var i in this.map){
-            for(var j in this.map[i]){
-                if(this.map[i][j]>=0){
-                    this.map[i][j]=0;
-                }
-            }
-        }
-        var distance=1;
-    }
     
     printMap(val){
         console.log('=====MAP=====');
@@ -176,7 +166,7 @@ class Robot{
     map;
     direction;
     constructor(map,id){
-        this.map=map
+        this.map=map;
         this.pos=this.map.spawns[id];
         console.log('[constructor Robot]:robot créé');
     }
@@ -185,28 +175,28 @@ class Robot{
             y=this.pos[0];
         switch (direction) {
             case 'left':
-                if(this.pos[1]-1!=-1 && this.map.getMap()[y][x-1]!=-1){
+                if(this.pos[1]-1>0 && this.map.getMap()[y][x-1]!=-1){
                     this.pos[1]-=1;
                 }else{
                     return -1;
                 }
                 break;
             case 'right':
-                if(this.pos[1]+1!=this.map.size[0] && this.map.getMap()[y][x+1]!=-1){
+                if(this.pos[1]+1<this.map.size[0]-1 && this.map.getMap()[y][x+1]!=-1){
                     this.pos[1]+=1;
                 }else{
                     return -1;
                 }
                 break;
             case 'top':
-                if(this.pos[0]-1!=-1 && this.map.getMap()[y-1][x]!=-1){
+                if(this.pos[0]-1>0 && this.map.getMap()[y-1][x]!=-1){
                     this.pos[0]-=1;
                 }else{
                     return -1;
                 }
                 break;
             case 'bottom':
-                if(this.pos[0]+1!=this.map.size[1] && this.map.getMap()[y+1][x]!=-1){
+                if(this.pos[0]+1<this.map.size[1]-1 && this.map.getMap()[y+1][x]!=-1){
                     this.pos[0]+=1;
                 }else{
                     return -1;
@@ -218,19 +208,82 @@ class Robot{
         }
     }
     getFastRoad(cible){
-        for(var i in this.map){
-            for(var j in this.map[i]){
-                if(this.map[i][j]>=0){
-                    this.map[i][j]=0;
+        for(var i in this.map.getMap()){
+            for(var j in this.map.getMap()[i]){
+                if(this.map.getMap()[i][j]>=0){
+                    this.map.getMap()[i][j]=0;
                 }
             }
         }
         var distance=1;
+        var x1=cible[1],
+            y1=cible[0];
+        var x2=this.pos[1],
+            y2=this.pos[0];
 
-        
+        this.map.getMap()[y2][x2]=1;
 
+        while(this.map.map[y1][x1]==0){
+
+            var temp=this.map.getMap()
+            distance++;
+
+            for(var i=1;i<(this.map.size[1]-1);i++){
+                for(var j=1;j<this.map.size[0]-1;j++){
+                    if(
+                        this.map.getMap()[i][j]==0 &&
+                        (
+                            this.map.getMap()[i+1][j]==distance-1 ||
+                            this.map.getMap()[i-1][j]==distance-1 ||
+                            this.map.getMap()[i][j+1]==distance-1 ||
+                            this.map.getMap()[i][j-1]==distance-1
+                        )
+                    ){
+                        temp[i][j]=distance;
+                    }
+                }
+            }
+            this.map.map=temp;
+        }
+        var x=cible[1],
+            y=cible[0];
+        var top,left,bottom,right;
+        var fastRoad=[];
+
+        while(this.map.getMap()[y][x]!=1){
+            top=this.map.getMap()[y-1][x];
+            if(top<=0){
+                top=500;
+            }
+            bottom=this.map.getMap()[y+1][x];
+            if(bottom<=0){
+                bottom=500;
+            }
+            left=this.map.getMap()[y][x-1];
+            if(left<=0){
+                left=500;
+            }
+            right=this.map.getMap()[y][x+1];
+            if(right<=0){
+                right=500;
+            }
+
+            if(top<=bottom && top<=left && top<=right){
+                y-=1;
+                fastRoad.push('bottom');
+            }else if(bottom<=top && bottom<=left && bottom<=right){
+                y+=1;
+                fastRoad.push('top');
+            }else if(left<=top && left<=bottom && left<=right){
+                x-=1;
+                fastRoad.push('right');
+            }else if(right<=top && right<=bottom && right<=left){
+                x+=1;
+                fastRoad.push('left');
+            }
+        }
+        return fastRoad;
     }
-
 }
 
 class Arme{
