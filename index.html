@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./index.css">
+    <title>Document</title>
+</head>
+<body>
+
+    <canvas id="map" width="840" height="680"></canvas>
+
+    <img src="images/murs/brick.png" class="walls">
+    <img src="images/murs/brks_2.png" class="walls">
+    <img src="images/murs/brks_6.png" class="walls">
+
+    <img src="images/sols/ground.png" class="ground">
+    <img src="images/sols/w33_7.png" class="ground">
+    <img src="images/sols/wood2.png" class="ground">
+
+    <script src="js/fonctions.js"></script>
+    <script src="js/mapgeneration.js"></script>
+    <script>
+        var canvas=document.getElementById('map');
+        var ctx=canvas.getContext("2d");
+        var map=new Map([21,17]);
+        pos=[0,0]
+
+        var murs = document.getElementsByClassName("walls");
+        var pick = getRandomInt(0, murs.length-1);
+        var patternWalls = ctx.createPattern(murs[pick], "repeat");
+
+        var sol = document.getElementsByClassName("ground");
+        pick = getRandomInt(0, sol.length-1);
+        var patternGround = ctx.createPattern(sol[pick], "repeat");
+
+
+        for(var i in map.getMap()){
+            for(var j in map.getMap()[i]){
+                if(map.getMap()[i][j]==-1){ 
+                
+                    ctx.fillStyle = patternWalls;
+
+                }else{
+                    ctx.fillStyle = patternGround;
+                }
+                ctx.fillRect(pos[0], pos[1], 40, 40);
+                pos[0]+=40;
+            }
+            pos[1]+=40;
+            pos[0]=0;
+        }
+
+    </script>
+</body>
+</html>
