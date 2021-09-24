@@ -20,8 +20,27 @@ function loop() {
                 ctx.fillStyle = "white";
             }
             ctx.fillRect(pos[0], pos[1], 30, 30);
-            ctx.fillStyle = "black";
-            ctx.strokeText(robot1.map.map[i][j],pos[0]+15,pos[1]+15);
+            var vision1=robot1.vision,
+                vision2=robot2.vision;
+            var isOnVision=false;
+            for(var k in vision1){
+                var x1=vision1[k][0];
+                var y1=vision1[k][1];
+                if(i==y1 && j==x1){
+                    isOnVision=true;
+                }
+            }
+            for(var k in vision2){
+                var x1=vision2[k][0];
+                var y1=vision2[k][1];
+                if(i==y1 && j==x1){
+                    isOnVision=true;
+                }
+            }
+            if(!isOnVision){
+                ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+                ctx.fillRect(pos[0],pos[1],30,30);
+            }
             pos[0]+=30;
         }
         pos[1]+=30;
@@ -33,7 +52,50 @@ function loop() {
     ctx.drawImage(img,robot2.pos[1]*30,robot2.pos[0]*30,30,30);
 }
 
+var temp=[];
+
 function robotAI(robot,cible) {
-    var move=robot.getFastRoad([cible.pos[0],cible.pos[1]]);
-    robot.move(move[move.length-1]);
+    var x1=robot.pos[1],
+        x2=cible.pos[1],
+        y1=robot.pos[0],
+        y2=cible.pos[0];
+    
+    for(var i in robot.vision){
+        if(x2==robot.vision[i][0] && y2==robot.vision[i][1]){
+            robot.lastCiblePosition=[robot.vision[i][1],robot.vision[i][0]];
+        }
+    }
+    if(robot.getFastRoad()){
+        var move=robot.getFastRoad([cible.pos[0],cible.pos[1]]);
+        if(cible instanceof Robot){
+            switch(move[move.length-1]){
+                case 'top':
+                    if(y1-1==y2 && x1==x2){
+                        return -1
+                    }
+                    break;
+                case 'bottom':
+                    if(y1+1==y2 && x1==x2){
+                        return -1
+                    }
+                    break;
+                case 'left':
+                    if(y1==y2 && x1-1==x2){
+                        return -1
+                    }
+                    break;
+                case 'right':
+                    if(y1==y2 && x1+1==x2){
+                        return -1
+                    }
+                    break; 
+                default:
+                    break;
+            }
+        }
+        robot.move(move[move.length-1]);
+    }else{
+        robot.randomMove();
+    }
+    robot.getVision();
 }
