@@ -8,7 +8,8 @@
     <title>Document</title>
 </head>
 <body>
-    <canvas id="map" width="840" height="680"></canvas>
+    <canvas id="map" width="930" height="630" 
+        style="position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);"></canvas>
     <img src="IMG/robot.png" alt="" id="robot" style="display: none;">
     <script src="js/fonctions.js"></script>
     <script src="js/mapgeneration.js"></script>
@@ -16,7 +17,9 @@
     <script>
         setInterval(loop,1000/30);
         var robot1Move=setInterval(()=>{robotAI(robot1,robot2)},robot1.speed*1000);
-        var robot2Move=setInterval(()=>{robotAI(robot2,robot1)},robot2.speed*1000);
+        setTimeout(() => {
+            var robot2Move=setInterval(()=>{robotAI(robot2,robot1)},robot2.speed*1000);
+        }, robot2.speed*1000);
     </script>
 </body>
 </html>

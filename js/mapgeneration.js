@@ -13,7 +13,7 @@ class Map{
         this.init();
         while(this.getMurs()<(
             (this.size[0]+this.size[1]-1)*2-2)
-            +(((this.size[0]-1)/2)-1)*((this.size[1]/2)-2)+this.size[0]*2
+            +(((this.size[0]-1)/2)-1)*((this.size[1]/2)-2)+this.size[0]*3
             ){
                 this.map=new Array(this.size[0]);
                 this.init();
@@ -290,36 +290,10 @@ class Arme{
     damage;
     durability;
     speed;
-    constructor(type){
-        switch (type) {
-            case 'epee_bois':
-                this.epee_bois();
-                break;
-            case 'epee_pierre':
-                this.epee_pierre();
-                break;
-            case 'epee_fer':
-                this.epee_fer();
-                break;
-            default:
-                console.log('arme inconnu');
-                break;
-        }
-    }
-    epee_bois(){
-        this.damage=1;
-        this.durability=4;
-        this.speed=1.2;
-    }
-    epee_pierre(){
-        this.damage=2;
-        this.durability=6;
-        this.speed=1.5;
-    }
-    epee_fer(){
-        this.damage=3.5;
-        this.durability=6;
-        this.speed=1.8;
+    constructor(damage,durability,speed){
+        this.damage=damage;
+        this.durability=durability;
+        this.speed=speed;
     }
     getDamage(){
         return this.damage
