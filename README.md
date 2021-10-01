@@ -1,3 +1,3 @@
 # labyrinthe
 
-Voir la branch 'pierre'
+Voir la branche 'pierre'
