@@ -5,23 +5,33 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <link rel="stylesheet" href="style/index.css">
+
     <title>Document</title>
 </head>
 <body>
-    <canvas id="map" width="930" height="630" 
-        style="position: absolute;top: 50%;left: 50%;transform: translate(-50%,-50%);"></canvas>
-    <img src="IMG/robot.png" alt="" id="robot" style="display: none;">
+    <div class="canvas-container mid">
+        <canvas id="map" width="930" height="630"></canvas>
+    </div>
+
+    <div class="blink mid">
+        press space
+    </div>
+    
+    <div class="imgs" style="display: none;">
+        <img src="IMG/robot.png" alt="" id="img-robot">
+        <img src="IMG/monstre.png" alt="" id="img-robot0">
+        <img src="IMG/monstre1.png" alt="" id="img-robot1">
+        <img src="IMG/balle.png" alt="" id="img-balle">
+    </div>
     <script src="js/fonctions.js"></script>
+    <script src="js/Laser.js"></script>
     <script src="js/Map.js"></script>
     <script src="js/Robot.js"></script>
     <script src="js/Arme.js"></script>
+    <script src="js/Game.js"></script>
     <script src="js/gameloop.js"></script>
     <script>
-        setInterval(loop,1000/30);
-        var robot1Move=setInterval(()=>{robotAI(robot1,robot2)},robot1.speed*1000);
-        setTimeout(() => {
-            var robot2Move=setInterval(()=>{robotAI(robot2,robot1)},robot2.speed*1000);
-        }, robot2.speed*1000);
     </script>
 </body>
 </html>
