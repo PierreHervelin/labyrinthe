@@ -37,6 +37,10 @@ window.onkeyup=(e)=>{
                     game.start();
                     pauseDiv.style.display='none';
                     break;
+                case 'finished':
+                    game.start();
+                    pauseDiv.style.display='none';
+                    break;
                 default:
                     break;
             }

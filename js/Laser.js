@@ -21,7 +21,7 @@ class Laser{
             case 'left':
                 if(
                     x-1>0 && map[y][x-1]!=-1 &&
-                    !(this.thereIsRobot())
+                    this.thereIsRobot()===false
                 ){
                     this.pos.x-=1;
                     return
@@ -30,7 +30,7 @@ class Laser{
             case 'right':
                 if(
                     x+1<size[0]-1 && map[y][x+1]!=-1 &&
-                    !(this.thereIsRobot())
+                    this.thereIsRobot()===false
                 ){
                     this.pos.x+=1;
                     return
@@ -39,7 +39,7 @@ class Laser{
             case 'top':
                 if(
                     y-1>0 && map[y-1][x]!=-1 &&
-                    !(this.thereIsRobot())
+                    this.thereIsRobot()===false
                 ){
                     this.pos.y-=1;
                     return
@@ -48,7 +48,7 @@ class Laser{
             case 'bottom':
                 if(
                     y+1<size[1]-1 && map[y+1][x]!=-1 &&
-                    !(this.thereIsRobot())
+                    this.thereIsRobot()===false
                 ){
                     this.pos.y+=1;
                     return
@@ -56,6 +56,9 @@ class Laser{
                 break;
             default:
                 break;
+        }
+        if(!(this.thereIsRobot()===false)){
+            this.game.getRobot(this.thereIsRobot()).takeDamage(this.damage);
         }
         this.isDead=true;
     }
@@ -67,35 +70,35 @@ class Laser{
 
         switch (this.dir) {
             case 'left':
-                if(
-                    (x-1==supremVue.robot1.x && y==supremVue.robot1.y) || 
-                    (x-1==supremVue.robot0.x && y==supremVue.robot0.y)
-                ){
-                    return true;
+                if(x-1==supremVue.robot1.x && y==supremVue.robot1.y){
+                    return 1;
+                }
+                if(x-1==supremVue.robot0.x && y==supremVue.robot0.y){
+                    return 0;
                 }
                 break;
             case 'right':
-                if(
-                    (x+1==supremVue.robot1.x && y==supremVue.robot1.y) || 
-                    (x+1==supremVue.robot0.x && y==supremVue.robot0.y)
-                ){
-                    return true;
+                if(x+1==supremVue.robot1.x && y==supremVue.robot1.y){
+                    return 1;
+                }
+                if(x+1==supremVue.robot0.x && y==supremVue.robot0.y){
+                    return 0;
                 }
                 break;
             case 'top':
-                if(
-                    (x==supremVue.robot1.x && y-1==supremVue.robot1.y) || 
-                    (x==supremVue.robot0.x && y-1==supremVue.robot0.y)
-                ){
-                    return true;
+                if(x==supremVue.robot1.x && y-1==supremVue.robot1.y){
+                    return 1;
+                }
+                if(x==supremVue.robot0.x && y-1==supremVue.robot0.y){
+                    return 0;
                 }
                 break;
             case 'bottom':
-                if(
-                    (x==supremVue.robot1.x && y+1==supremVue.robot1.y) || 
-                    (x==supremVue.robot0.x && y+1==supremVue.robot0.y)
-                ){
-                    return true;
+                if(x==supremVue.robot1.x && y+1==supremVue.robot1.y){
+                    return 1;
+                }
+                if(x==supremVue.robot0.x && y+1==supremVue.robot0.y){
+                    return 0;
                 }
                 break;
         

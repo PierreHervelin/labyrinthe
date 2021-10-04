@@ -42,7 +42,8 @@ class Game {
         this.imgs={
             robot0:document.getElementById('img-robot0'),
             robot1:document.getElementById('img-robot1'),
-            balle:document.getElementById('img-balle')
+            balle:document.getElementById('img-balle'),
+            dead:document.getElementById('img-dead')
         }
     }
     start(){
@@ -59,7 +60,7 @@ class Game {
                 }, this.getRobot(1).speed*1000);
             }, this.getRobot(1).speed*1000);
         }
-        if(this.game.state=='stopped'){
+        if(this.game.state=='stopped' || this.game.state=='finished'){
             this._init();
             this.game.state='started';
             this.gameloop={
@@ -87,6 +88,9 @@ class Game {
                     clearInterval(this.gameloop[key]);
                 }
             });
+            for(var i in this.game.laser){
+                clearInterval(this.gameloop.laser[i]);
+            }
         }
     }
     stop(){
@@ -97,6 +101,20 @@ class Game {
             });
             this.ctx.fillStyle = "black";
             this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+            for(var i in this.game.laser){
+                clearInterval(this.gameloop.laser[i]);
+            }
+        }
+    }
+    finish(){
+        if(this.game.state=='started'){
+            this.game.state='finished';
+            Object.keys(this.gameloop).map((key)=>{
+                clearInterval(this.gameloop[key]);
+            });
+            for(var i in this.game.laser){
+                clearInterval(this.gameloop.laser[i]);
+            }
         }
     }
     loop(){
@@ -108,19 +126,28 @@ class Game {
         //Génération de la map :
         for(var i in this.getMap()){
             for(var j in this.getMap()[i]){
-                this.ctx.fillStyle = "black";
-                this.ctx.fillRect(j*30, i*30, 30, 30);
-                for(var robot in this.getAllRobot()){
-                    for(var k in this.getRobot(robot).getVision2()){
-                        var x=this.getRobot(robot).getVision2()[k][0],
-                            y=this.getRobot(robot).getVision2()[k][1];
-                        if((i==y && j==x)){
-                            if(this.getMap()[i][j]==-1){
-                                this.ctx.fillStyle = "#333";
-                            }else{
-                                this.ctx.fillStyle = "#fdd371";
+                if(this.getRobot(0).isDead||this.getRobot(1).isDead){
+                    if(this.getMap()[i][j]==-1){
+                        this.ctx.fillStyle = "#333";
+                    }else{
+                        this.ctx.fillStyle = "#fdd371";
+                    }
+                    this.ctx.fillRect(j*30,i*30,30,30);
+                }else{
+                    this.ctx.fillStyle = "black";
+                    this.ctx.fillRect(j*30, i*30, 30, 30);
+                    for(var robot in this.getAllRobot()){
+                        for(var k in this.getRobot(robot).getVision2()){
+                            var x=this.getRobot(robot).getVision2()[k][0],
+                                y=this.getRobot(robot).getVision2()[k][1];
+                            if((i==y && j==x)){
+                                if(this.getMap()[i][j]==-1){
+                                    this.ctx.fillStyle = "#333";
+                                }else{
+                                    this.ctx.fillStyle = "#fdd371";
+                                }
+                                this.ctx.fillRect(j*30,i*30,30,30);
                             }
-                            this.ctx.fillRect(j*30,i*30,30,30);
                         }
                     }
                 }
@@ -148,16 +175,35 @@ class Game {
 
         //Placement des robots :
         for(var i in this.getAllRobot()){
-            this.ctx.drawImage(
-                this.imgs[`robot${i}`],
-                this.getSupremVue()['robot'+i].x*30,
-                this.getSupremVue()['robot'+i].y*30,
-                30,30
-            );
+            if(this.getRobot(i).isDead){
+                this.ctx.drawImage(
+                    this.imgs.dead,
+                    this.getSupremVue()['robot'+i].x*30,
+                    this.getSupremVue()['robot'+i].y*30,
+                    30,30
+                );
+            }else{
+                this.ctx.drawImage(
+                    this.imgs[`robot${i}`],
+                    this.getSupremVue()['robot'+i].x*30,
+                    this.getSupremVue()['robot'+i].y*30,
+                    30,30
+                );
+            }
         }
         if(this.getState()=='paused'){
             this.ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
             this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+        }
+        //Actualisation des barres de vies :
+        var health0=document.getElementById('health0'),
+            health1=document.getElementById('health1');
+        
+        health0.style.width=`${this.getRobot(0).health*10}%`;
+        health1.style.width=`${this.getRobot(1).health*10}%`;
+
+        if(this.getRobot(0).isDead||this.getRobot(1).isDead){
+            this.finish();
         }
     }
     getSupremVue(){
@@ -195,7 +241,6 @@ class Game {
         this.gameloop.laser.push(
             setInterval(() => {
                 laser.move();
-                console.log('oui');
             }, laser.speed*1000)
         )
     }

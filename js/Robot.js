@@ -4,6 +4,9 @@ class Robot{
     damage=0.5;
     speed=0.5;
     attack_speed=0.8;
+    armor=0;
+    agility=1;
+    isDead=false;
     hand=undefined;
     body=undefined;
     pos;
@@ -145,6 +148,10 @@ class Robot{
                     this.move('right');
                     break;
                 default:
+                    //si le spawn du robot est dans une impasse
+                    var dir=['left','top','right'];
+                    var pick=getRandomInt(0,2);
+                    this.direction=dir[pick];
                     break;
             }
         }else{
@@ -429,12 +436,64 @@ class Robot{
         }
         return false;
     }
+    thereIsRobotInView(){
+        var x=this.pos.x,
+            y=this.pos.y;
+
+        if(this.id==0){
+            var xRobot=this.game.getSupremVue().robot1.x,
+                yRobot=this.game.getSupremVue().robot1.y;
+        }else{
+            var xRobot=this.game.getSupremVue().robot0.x,
+                yRobot=this.game.getSupremVue().robot0.y;
+        }
+
+        var map=this.game.getMap();
+
+        while(map[y][x]!=-1){
+            if(x==xRobot && y==yRobot){
+                return true;
+            }
+            switch (this.direction) {
+                case 'left':
+                    x-=1;
+                    break;
+                case 'right':
+                    x+=1;
+                    break;
+                case 'top':
+                    y-=1;
+                    break;
+                case 'bottom':
+                    y+=1;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return false;
+    }
     setSpeed(speed){
         this.speed=speed;
         clearInterval(this.game.gameloop[`robot${this.id}`]);
         this.game.gameloop[`robot${this.id}`]=setInterval(()=>{
             this.robotStart();
         },this.speed*1000);
+    }
+    takeDamage(damage){
+        damage-=this.armor;
+
+        var pick1=getRandomInt(this.agility,100),
+            pick2=getRandomInt(this.agility,100);
+        
+        if(pick1===pick2){
+            //dodge
+            return;
+        }
+        this.health-=damage;
+        if(this.health<=0){
+            this.isDead=true;
+        }
     }
     fire(){
         this.game.addLaser(
@@ -480,11 +539,13 @@ class Robot{
         }
 
         if(this.cible){
-            //si c'est un robot on s'arrête une case avant sa position
             switch (this.cible.type) {
                 case 'robot':
-                    if(this.cible.fastRoad.length===1){
-                        console.log(`[robot ${this.id}]:arrivé sur l'ennemi`);
+                    if(this.thereIsRobotInView()){
+                        this.fire();
+                        return;
+                    }else if(this.cible.fastRoad.length==0){
+                        this.cible=undefined;
                         return;
                     }
                     break;
