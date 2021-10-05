@@ -5,10 +5,11 @@ class Laser{
     dir;
     game;
     isDead=false;
-    constructor(game,x,y,dir){
+    constructor(game,x,y,dir,damage){
         this.pos={x,y};
         this.dir=dir;
         this.game=game;
+        this.damage=damage;
     }
     move(){
         var x=this.pos.x,

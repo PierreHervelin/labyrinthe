@@ -2,18 +2,30 @@ class Robot{
     id;
     health=10.0;
     damage=0.5;
+    reach=1;
     speed=0.5;
     attack_speed=0.8;
     armor=0;
     agility=1;
     isDead=false;
-    hand=undefined;
-    body=undefined;
+    hand={
+        weapon:undefined,
+        type:'melee',
+        damage:0,
+        reach:0
+    };
+    body={
+        item:undefined,
+        armor:0,
+        speed:0
+    };
     pos;
     game;
     direction='bottom';
+    moveBackup=[];
+    moveHistory=[];
+    impasses=[];
     cible=undefined;
-    lastMove;
     constructor(game,id){
         this.id=id;
         this.game=game;
@@ -32,7 +44,6 @@ class Robot{
                 if(x-1>0 && this.game.getMap()[y][x-1]!=-1 && !(this.thereIsRobot('left'))){
                     this.pos.x-=1;
                     this.direction='left';
-                    this.lastMove='left';
                     return undefined;
                 }else{
                     this.direction='left';
@@ -42,7 +53,6 @@ class Robot{
                 if(x+1<this.game.getSize()[0]-1 && this.game.getMap()[y][x+1]!=-1 && !(this.thereIsRobot('right'))){
                     this.pos.x+=1;
                     this.direction='right';
-                    this.lastMove='right';
                     return undefined;
                 }else{
                     this.direction='right';
@@ -52,7 +62,6 @@ class Robot{
                 if(y-1>0 && this.game.getMap()[y-1][x]!=-1 && !(this.thereIsRobot('top'))){
                     this.pos.y-=1;
                     this.direction='top';
-                    this.lastMove='top';
                     return undefined;
                 }else{
                     this.direction='top';
@@ -62,7 +71,6 @@ class Robot{
                 if(y+1<this.game.getSize()[1]-1 && this.game.getMap()[y+1][x]!=-1 && !(this.thereIsRobot('bottom'))){
                     this.pos.y+=1;
                     this.direction='bottom';
-                    this.lastMove='bottom';
                     return undefined;
                 }else{
                     this.direction='bottom';
@@ -73,18 +81,6 @@ class Robot{
                 break;
         }
         return -1
-    }
-    randomMove(){
-        var moves=['left','right','top','bottom'];
-        var pick=getRandomInt(0,moves.length-1);
-        
-        while(moves[pick]==this.lastMove || this.move(moves[pick])){
-            if(this.isInImpasse()){
-                this.lastMove='';
-                break;
-            }
-            pick=getRandomInt(0,moves.length-1);
-        }
     }
     getPossiblePath(){
         var x=this.pos.x,
@@ -132,31 +128,42 @@ class Robot{
     choosePath(){
         var possiblePath=this.getPossiblePath();
 
-        if(this.getPossiblePath().length==0){
-            this.cible=undefined;
-            switch (this.lastMove) {
-                case 'top':
-                    this.move('bottom');
-                    break;
-                case 'bottom':
-                    this.move('top');
-                    break;
-                case 'right':
-                    this.move('left');
-                    break;
-                case 'left':
-                    this.move('right');
-                    break;
-                default:
-                    //si le spawn du robot est dans une impasse
-                    var dir=['left','top','right'];
-                    var pick=getRandomInt(0,2);
-                    this.direction=dir[pick];
-                    break;
+        var indices=[];
+        for(var i in possiblePath){
+            var isIn=this.isPathIn(this.impasses,possiblePath[i]);
+            var isIn2=this.isPathIn(this.moveBackup,possiblePath[i]);
+            if(isIn){
+                indices.push(isIn-1);
+            }else if(isIn2){
+                indices.push(isIn2-1);
             }
+        }
+        for(var i in indices){
+            possiblePath.splice(indices[i],1);
+        }
+
+        if(this.getPossiblePath().length==0){
+            if(this.cible){
+                this.impasses.push([this.cible.x,this.cible.y]);
+            }else{
+                this.impasses.push([this.pos.x,this.pos.y]);
+            }
+            this.cible=undefined;
+            this.turnBack();
+            
         }else{
+            var newPath=this.getNewPath();
+            if(newPath.length>0){
+                possiblePath=newPath;
+            }
             var pick=getRandomInt(0,possiblePath.length-1);
 
+            this.moveBackup.push(possiblePath[pick]);
+            this.moveHistory.push(possiblePath[pick]);
+
+            if(this.moveBackup.length>4){
+                this.moveBackup.shift();
+            }
             this.cible={
                 x:possiblePath[pick][0],
                 y:possiblePath[pick][1],
@@ -165,26 +172,44 @@ class Robot{
             };
         }
     }
-    isInImpasse(){
-        var x=this.pos.x,
-            y=this.pos.y;
-        var issue=4;
-        if(this.game.getMap()[y][x-1]==-1){
-            issue-=1;
+    turnBack(){
+        switch (this.direction) {
+            case 'top':
+                this.move('bottom');
+                break;
+            case 'bottom':
+                this.move('top');
+                break;
+            case 'right':
+                this.move('left');
+                break;
+            case 'left':
+                this.move('right');
+                break;
+            default:
+                break;
         }
-        if(this.game.getMap()[y][x+1]==-1){
-            issue-=1;
+    }
+    isPathIn(tab,path){
+        for(var i in tab){
+            if(
+                path[0]==tab[i][0] &&
+                path[1]==tab[i][1]
+            ){
+                return i+1;
+            }
         }
-        if(this.game.getMap()[y-1][x]==-1){
-            issue-=1;
+    }
+    getNewPath(){
+        var possiblePath=this.getPossiblePath();
+        var newPath=[];
+
+        for(var i in possiblePath){
+            if(!(this.isPathIn(this.moveHistory,possiblePath[i]))){
+                newPath.push(possiblePath[i]);
+            }
         }
-        if(this.game.getMap()[y+1][x]==-1){
-            issue-=1;
-        }
-        if(issue==1){
-            return true;
-        }
-        return false;
+        return newPath;
     }
     getVision2(){
         var x=this.pos.x,
@@ -226,100 +251,6 @@ class Robot{
         }else{
             vision.push([x,y+1]);
             vision.push([x,y-1]);
-        }
-        return vision;
-    }
-    getVision(){
-    //Récupère les coordonnées de chaque bloque du champs de vision
-        var x=this.pos.x,
-            y=this.pos.y;
-        
-        var vision=[];
-
-        switch (this.direction) {
-            case 'top':
-                for(var i=0;i<6;i++){
-                    if(y-i<0){
-                        break;
-                    }
-                    vision.push([x,y-i]);
-                    for(var j=i*(-1);j<0;j++){
-                        if(x+j<0){
-                            continue;
-                        }
-                        vision.push([x+j,y-i]);
-                    }
-                    for(var j=1;j<i;j++){
-                        if(x+j>this.game.getSize()[0]-1){
-                            break;
-                        }
-                        vision.push([x+j,y-i]);
-                    }
-                }
-                break;
-            case 'bottom':
-                for(var i=0;i<6;i++){
-                    if(y+i>this.game.getSize()[1]-1){
-                        break;
-                    }
-                    vision.push([x,y+i]);
-                    for(var j=i*(-1);j<0;j++){
-                        if(x+j<0){
-                            continue;
-                        }
-                        vision.push([x+j,y+i]);
-                    }
-                    for(var j=1;j<i;j++){
-                        if(x+j>this.game.getSize()[0]-1){
-                            break;
-                        }
-                        vision.push([x+j,y+i]);
-                    }
-                }
-                break;
-            case 'right':
-                for(var i=0;i<6;i++){
-                    if(x+i>this.game.getSize()[0]-1){
-                        break;
-                    }
-                    vision.push([x+i,y]);
-                    for(var j=i*(-1);j<0;j++){
-                        if(y+j<0){
-                            continue;
-                        }
-                        vision.push([x+i,y+j]);
-                    }
-                    for(var j=1;j<i;j++){
-                        if(y+j>this.game.getSize()[1]-1){
-                            break;
-                        }
-                        vision.push([x+i,y+j]);
-                    }
-                }
-                break;
-            case 'left':
-                for(var i=0;i<6;i++){
-                    if(x-i<0){
-                        break;
-                    }
-                    vision.push([x-i,y]);
-                    for(var j=i*(-1);j<0;j++){
-                        if(y+j<0){
-                            continue;
-                        }
-                        vision.push([x-i,y+j]);
-                    }
-                    for(var j=1;j<i;j++){
-                        if(y+j>this.game.getSize()[1]-1){
-                            break;
-                        }
-                        vision.push([x-i,y+j]);
-                    }
-                }
-                break;
-        
-            default:
-                break;
         }
         return vision;
     }
@@ -452,7 +383,11 @@ class Robot{
 
         while(map[y][x]!=-1){
             if(x==xRobot && y==yRobot){
-                return true;
+                if(this.direction=='top'||this.direction=='bottom'){
+                    return Math.abs(this.pos.y-y);
+                }else{
+                    return Math.abs(this.pos.x-x);
+                }
             }
             switch (this.direction) {
                 case 'left':
@@ -474,13 +409,18 @@ class Robot{
         return false;
     }
     setSpeed(speed){
-        this.speed=speed;
-        clearInterval(this.game.gameloop[`robot${this.id}`]);
-        this.game.gameloop[`robot${this.id}`]=setInterval(()=>{
-            this.robotStart();
-        },this.speed*1000);
+        if(speed!=this.speed){
+            this.speed=speed;
+            clearInterval(this.game.gameloop[`robot${this.id}`]);
+            this.game.gameloop[`robot${this.id}`]=setInterval(()=>{
+                this.robotStart();
+            },this.speed*1000);
+        }
     }
     takeDamage(damage){
+        if(this.cible && this.cible.type!='robot'){
+            this.turnBack();
+        }
         damage-=this.armor;
 
         var pick1=getRandomInt(this.agility,100),
@@ -496,9 +436,20 @@ class Robot{
         }
     }
     fire(){
-        this.game.addLaser(
-            new Laser(this.game,this.pos.x,this.pos.y,this.direction)
-        );
+        if(this.hand.type=='ranged'){
+            this.game.addLaser(
+                new Laser(this.game,this.pos.x,this.pos.y,this.direction,this.getDamage())
+            );
+        }
+    }
+    hit(){
+        if(this.hand.type=='melee'){
+            if(this.id==0){
+                this.game.getRobot(1).takeDamage(this.getDamage());
+            }else{
+                this.game.getRobot(0).takeDamage(this.getDamage());
+            }
+        }
     }
     robotStart(){
         var x,y;
@@ -541,9 +492,20 @@ class Robot{
         if(this.cible){
             switch (this.cible.type) {
                 case 'robot':
-                    if(this.thereIsRobotInView()){
-                        this.fire();
-                        return;
+                    if(this.thereIsRobotInView() && this.thereIsRobotInView()<=this.getReach()){
+                        switch (this.hand.type) {
+                            case 'ranged':
+                                this.fire();
+                                break;
+                            case 'melee':
+                                this.hit();
+                                break;
+                            default:
+
+                                break;
+                        }
+                        //this.fire();
+                        //return;
                     }else if(this.cible.fastRoad.length==0){
                         this.cible=undefined;
                         return;
@@ -568,5 +530,18 @@ class Robot{
             }
             this.move(this.cible.fastRoad[this.cible.fastRoad.length-1]);
         }
+    }
+    //get
+    getDamage(){
+        return this.damage+this.hand.damage;
+    }
+    getReach(){
+        return this.reach+this.hand.reach;
+    }
+    getArmor(){
+        return this.armor+this.body.armor;
+    }
+    getSpeed(){
+        return this.speed+this.body.speed;
     }
 }
