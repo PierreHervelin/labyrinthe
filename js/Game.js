@@ -4,7 +4,7 @@ class Game {
     ctx;
     imgs;
     gameloop;
-    idLaser;
+    weapons={};
     constructor(canvas){
         this.game={state:'stopped'};
         this.canvas=document.getElementById(canvas);
@@ -28,6 +28,23 @@ class Game {
         //nombre de tours joués
         this.game.round=0;
 
+        this.weapons={
+            gun:new Arme(2.5,8,'ranged'),
+            katana:new Arme(4,1,'melee')
+        };
+
+        //placement des armes sur la map
+        for(var i in this.weapons){
+            var x=getRandomInt(1,this.getSize()[0]-2),
+                y=getRandomInt(1,this.getSize()[1]-2);
+            
+            while(this.getMap()[y][x]==-1){
+                x=getRandomInt(1,this.getSize()[0]-2),
+                y=getRandomInt(1,this.getSize()[1]-2);
+            }
+            this.weapons[i].pos={x,y};
+        }
+
         /*
             init:jeu en phase d'initialisation
             paused:jeu en pause
@@ -43,7 +60,9 @@ class Game {
             robot0:document.getElementById('img-robot0'),
             robot1:document.getElementById('img-robot1'),
             balle:document.getElementById('img-balle'),
-            dead:document.getElementById('img-dead')
+            dead:document.getElementById('img-dead'),
+            gun:document.getElementById('img-gun'),
+            katana:document.getElementById('img-katana')
         }
     }
     start(){
@@ -133,6 +152,19 @@ class Game {
                         this.ctx.fillStyle = "#fdd371";
                     }
                     this.ctx.fillRect(j*30,i*30,30,30);
+
+                    //placement des armes sur la map
+                    for(var key in this.weapons){
+                        var xWeapon=this.weapons[key].pos.x,
+                            yWeapon=this.weapons[key].pos.y;
+                        if(xWeapon==j && yWeapon==i){
+                            this.ctx.drawImage(
+                                this.imgs[key],
+                                j*30+2,i*30+2,
+                                25,25
+                            );
+                        }
+                    }
                 }else{
                     this.ctx.fillStyle = "black";
                     this.ctx.fillRect(j*30, i*30, 30, 30);
@@ -147,6 +179,19 @@ class Game {
                                     this.ctx.fillStyle = "#fdd371";
                                 }
                                 this.ctx.fillRect(j*30,i*30,30,30);
+
+                                //placement des armes si elles sont dans le champs de vision :
+                                for(var key in this.weapons){
+                                    var xWeapon=this.weapons[key].pos.x,
+                                        yWeapon=this.weapons[key].pos.y;
+                                    if(xWeapon==j && yWeapon==i){
+                                        this.ctx.drawImage(
+                                            this.imgs[key],
+                                            j*30+2,i*30+2,
+                                            25,25
+                                        );
+                                    }
+                                }
                             }
                         }
                     }
@@ -208,19 +253,7 @@ class Game {
     }
     getSupremVue(){
     //return la position de chaque éléments sur la map
-    
-        var laser=[];
-        if(this.game.laser.length>0){
-            for(var i in this.game.laser){
-                laser.push({
-                    x:this.game.laser[i].pos.x,
-                    y:this.game.laser[i].pos.y,
-                    type:'laser',
-                    owner:`robot${this.game.laser[i].robot}`
-                });
-            }
-        }
-        return {
+        var supremVue={
             robot0:{
                 x:this.getRobot(0).pos.x,
                 y:this.getRobot(0).pos.y,
@@ -232,9 +265,29 @@ class Game {
                 y:this.getRobot(1).pos.y,
                 type:'robot',
                 id:1
-            },
-            laser:laser
+            }
         };
+        var laser=[];
+        if(this.game.laser.length>0){
+            for(var i in this.game.laser){
+                laser.push({
+                    x:this.game.laser[i].pos.x,
+                    y:this.game.laser[i].pos.y,
+                    type:'laser',
+                    owner:`robot${this.game.laser[i].robot}`
+                });
+            }
+        }
+        supremVue.laser=laser;
+        for(var key in this.weapons){
+            supremVue[key]={
+                x:this.weapons[key].pos.x,
+                y:this.weapons[key].pos.y,
+                type:'weapon',
+                id:key
+            };
+        }
+        return supremVue;
     }
     addLaser(laser){
         this.game.laser.push(laser);

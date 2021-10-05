@@ -134,7 +134,7 @@ class Robot{
             var isIn2=this.isPathIn(this.moveBackup,possiblePath[i]);
             if(isIn){
                 indices.push(isIn-1);
-            }else if(isIn2){
+            }else if(isIn2 && possiblePath.length>1){
                 indices.push(isIn2-1);
             }
         }
@@ -432,6 +432,7 @@ class Robot{
         }
         this.health-=damage;
         if(this.health<=0){
+            this.health=0;
             this.isDead=true;
         }
     }
@@ -463,10 +464,14 @@ class Robot{
             y=vision[i][1];
             for(var key in supremVue){
                 if(this.id!=supremVue[key].id && x==supremVue[key].x && y==supremVue[key].y){
+                    if(supremVue[key].type=='weapon'&&this.hand.weapon){
+                        continue;
+                    }
                     cibles.push({
                         x:supremVue[key].x,
                         y:supremVue[key].y,
                         type:supremVue[key].type,
+                        id:supremVue[key].id,
                         fastRoad:this.getFastRoad(x,y)
                     });
                 }
@@ -496,6 +501,7 @@ class Robot{
                         switch (this.hand.type) {
                             case 'ranged':
                                 this.fire();
+                                return;
                                 break;
                             case 'melee':
                                 this.hit();
@@ -504,19 +510,29 @@ class Robot{
 
                                 break;
                         }
-                        //this.fire();
-                        //return;
-                    }else if(this.cible.fastRoad.length==0){
+                    }else if(this.cible.fastRoad.length===0){
                         this.cible=undefined;
                         return;
                     }
                     break;
                 case 'path':
-                    if(this.pos.x==this.cible.x && this.pos.y==this.cible.y){
+                    if(this.pos.x===this.cible.x && this.pos.y===this.cible.y){
                         this.choosePath();
                         if(!this.cible){
                             return;
                         }
+                    }
+                    break;
+                case 'weapon':
+                    if(this.cible.fastRoad.length===0){
+                        this.hand.weapon=this.cible.id;
+                        this.hand.damage=this.game.weapons[this.cible.id].damage;
+                        this.hand.reach=this.game.weapons[this.cible.id].reach;
+                        this.hand.type=this.game.weapons[this.cible.id].type;
+
+                        delete this.game.weapons[this.cible.id];
+                        this.cible=undefined;
+                        return;
                     }
                     break;
                 default:
@@ -533,10 +549,16 @@ class Robot{
     }
     //get
     getDamage(){
-        return this.damage+this.hand.damage;
+        if(this.hand.weapon){
+            return this.hand.damage;
+        }
+        return this.damage;
     }
     getReach(){
-        return this.reach+this.hand.reach;
+        if(this.hand.weapon){
+            return this.hand.reach;
+        }
+        return this.reach;
     }
     getArmor(){
         return this.armor+this.body.armor;
