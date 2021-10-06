@@ -1,12 +1,12 @@
 class Robot{
-    id;
+    id; //id du robot (0 ou 1)
     health=10.0;
     damage=0.5;
     reach=1;
     speed=0.5;
     attack_speed=0.8;
     armor=0;
-    agility=1;
+    agility=1; //chances d'esquives (ici 1/100)
     isDead=false;
     hand={
         weapon:undefined,
@@ -19,12 +19,12 @@ class Robot{
         armor:0,
         speed:0
     };
-    pos;
+    pos; //object {x,y}
     game;
     direction='bottom';
-    moveBackup=[];
+    moveBackup=[]; //4 derniers chemins
     moveHistory=[];
-    impasses=[];
+    impasses=[]; //les impasses sont gardées en mémoire ici
     cible=undefined;
     constructor(game,id){
         this.id=id;
@@ -83,6 +83,7 @@ class Robot{
         return -1
     }
     getPossiblePath(){
+        //return tous les chemins possible
         var x=this.pos.x,
             y=this.pos.y;
 
@@ -142,16 +143,19 @@ class Robot{
             possiblePath.splice(indices[i],1);
         }
 
-        if(this.getPossiblePath().length==0){
+        if(possiblePath.length==0){
+            //s'il n'y a pas de chemin possible -> demi-tour
             if(this.cible){
                 this.impasses.push([this.cible.x,this.cible.y]);
             }else{
+                //si le spawn est dans une impasse
                 this.impasses.push([this.pos.x,this.pos.y]);
             }
             this.cible=undefined;
             this.turnBack();
             
         }else{
+            //les nouveaux chemins sont prioritaires
             var newPath=this.getNewPath();
             if(newPath.length>0){
                 possiblePath=newPath;
@@ -368,6 +372,7 @@ class Robot{
         return false;
     }
     thereIsRobotInView(){
+        //thereIsRobot amélioré
         var x=this.pos.x,
             y=this.pos.y;
 
@@ -505,6 +510,7 @@ class Robot{
                                 break;
                             case 'melee':
                                 this.hit();
+                                return;
                                 break;
                             default:
 
