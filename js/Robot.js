@@ -176,23 +176,31 @@ class Robot{
             };
         }
     }
-    turnBack(){
-        switch (this.direction) {
+    turnBack(dir=this.direction){
+        switch (dir) {
             case 'top':
-                this.move('bottom');
+                this.direction='bottom';
                 break;
             case 'bottom':
-                this.move('top');
+                this.direction='top';
                 break;
             case 'right':
-                this.move('left');
+                this.direction='left';
                 break;
             case 'left':
-                this.move('right');
+                this.direction='right';
                 break;
             default:
                 break;
         }
+    }
+    turnOnRobot(){
+        if(this.id==0){
+            var dir=this.game.getRobot(1).direction;
+        }else{
+            var dir=this.game.getRobot(0).direction;
+        }
+        this.turnBack(dir);
     }
     isPathIn(tab,path){
         for(var i in tab){
@@ -424,7 +432,7 @@ class Robot{
     }
     takeDamage(damage){
         if(this.cible && this.cible.type!='robot'){
-            this.turnBack();
+            this.turnOnRobot();
         }
         damage-=this.armor;
 
@@ -544,14 +552,13 @@ class Robot{
                 default:
                     break;
             }
-            this.move(this.cible.fastRoad[this.cible.fastRoad.length-1]);
         }else{
             this.choosePath();
             if(!this.cible){
                 return;
             }
-            this.move(this.cible.fastRoad[this.cible.fastRoad.length-1]);
         }
+        this.move(this.cible.fastRoad[this.cible.fastRoad.length-1]);
     }
     //get
     getDamage(){
