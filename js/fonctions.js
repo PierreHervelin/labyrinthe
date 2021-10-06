@@ -27,3 +27,24 @@ function getRandomIntPaire(min, max) {
     }
     return val
 }
+function getIndex(tab,el) {
+    if(typeof el==='object' && typeof tab[0]==='object'){
+        for(var i in tab){
+            if(Array.isArray(tab)){
+                if(
+                    el[0]==tab[i][0] &&
+                    el[1]==tab[i][1]
+                ){
+                    return i+1;
+                }
+            }else{
+                if(
+                    el[0]==tab[î].x &&
+                    el[1]==tab[î].y
+                ){
+                    return i;
+                }
+            }
+        }
+    }
+}

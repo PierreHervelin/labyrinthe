@@ -472,11 +472,9 @@ class Robot{
         var vision=this.getVision2();
         
         //Vérifie si des cibles sont dans le champs de vision
-        for(var i=1;i<vision.length;i++){
-            x=vision[i][0];
-            y=vision[i][1];
+        if(this.game.reveal){
             for(var key in supremVue){
-                if(this.id!=supremVue[key].id && x==supremVue[key].x && y==supremVue[key].y){
+                if(!(Array.isArray(supremVue[key]))&&supremVue[key].id!=this.id){
                     if(supremVue[key].type=='weapon'&&this.hand.weapon){
                         continue;
                     }
@@ -485,8 +483,27 @@ class Robot{
                         y:supremVue[key].y,
                         type:supremVue[key].type,
                         id:supremVue[key].id,
-                        fastRoad:this.getFastRoad(x,y)
+                        fastRoad:this.getFastRoad(supremVue[key].x,supremVue[key].y)
                     });
+                }
+            }
+        }else{
+            for(var i=1;i<vision.length;i++){
+                x=vision[i][0];
+                y=vision[i][1];
+                for(var key in supremVue){
+                    if(this.id!=supremVue[key].id && x==supremVue[key].x && y==supremVue[key].y){
+                        if(supremVue[key].type=='weapon'&&this.hand.weapon){
+                            continue;
+                        }
+                        cibles.push({
+                            x:supremVue[key].x,
+                            y:supremVue[key].y,
+                            type:supremVue[key].type,
+                            id:supremVue[key].id,
+                            fastRoad:this.getFastRoad(x,y)
+                        });
+                    }
                 }
             }
         }
@@ -540,11 +557,11 @@ class Robot{
                 case 'weapon':
                     if(this.cible.fastRoad.length===0){
                         this.hand.weapon=this.cible.id;
-                        this.hand.damage=this.game.weapons[this.cible.id].damage;
-                        this.hand.reach=this.game.weapons[this.cible.id].reach;
-                        this.hand.type=this.game.weapons[this.cible.id].type;
+                        this.hand.damage=this.game.getWeapon(this.cible.id).damage;
+                        this.hand.reach=this.game.getWeapon(this.cible.id).reach;
+                        this.hand.type=this.game.getWeapon(this.cible.id).type;
 
-                        delete this.game.weapons[this.cible.id];
+                        delete this.game.game.obj.weapons[this.cible.id];
                         this.cible=undefined;
                         return;
                     }

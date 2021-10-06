@@ -32,6 +32,10 @@ body{
     height: 10px;
     width: 100%;
 }
+.top-infos.time{
+    top: -60px;
+    font-size: 30px;
+}
 .health-container{
     width: 50%;
     height: 10px;
@@ -55,4 +59,7 @@ body{
 }
 #health1{
     background: blue;
+}
+.blinkRed{
+    animation: 1s infinite textBlinkRed;
 }

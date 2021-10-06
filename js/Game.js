@@ -4,7 +4,7 @@ class Game {
     ctx;
     imgs;
     gameloop;
-    weapons={};
+    reveal=false;
     constructor(canvas){
         this.game={state:'stopped'};
         this.canvas=document.getElementById(canvas);
@@ -14,9 +14,10 @@ class Game {
         this.game={
             robot:[],
             map:new Map([31,21]),
-            obj:[],
+            obj:{},
             laser:[],
-            state:'init'
+            state:'init',
+            startTime:new Date()
         };
 
         //INIT robots
@@ -24,25 +25,27 @@ class Game {
             new Robot(this,0),
             new Robot(this,1)
         );
-        
-        //nombre de tours joués
-        this.game.round=0;
 
-        this.weapons={
+        this.reveal=false;
+
+        this.game.obj.weapons={
             gun:new Arme(2.5,8,'ranged'),
             katana:new Arme(4,1,'melee')
         };
 
         //placement des armes sur la map
-        for(var i in this.weapons){
+        for(var i in this.getObj('weapons')){
             var x=getRandomInt(1,this.getSize()[0]-2),
                 y=getRandomInt(1,this.getSize()[1]-2);
             
-            while(this.getMap()[y][x]==-1){
+            while(
+                    this.getMap()[y][x]==-1 &&
+                    !(getIndex(this.getSupremVue(),[x,y]))
+                ){
                 x=getRandomInt(1,this.getSize()[0]-2),
                 y=getRandomInt(1,this.getSize()[1]-2);
             }
-            this.weapons[i].pos={x,y};
+            this.getWeapon(i).pos={x,y};
         }
 
         /*
@@ -136,16 +139,51 @@ class Game {
             }
         }
     }
+    revealMap(){
+        this.reveal=true;
+    }
+    hideMap(){
+        this.reveal=false;
+    }
+    setTime(){
+        var time=this.game.currentTime.getTime()-this.game.startTime.getTime();
+        var ms=time%1000;
+        time=(time-ms)/1000;
+        var secs=time%60;
+        time=(time-secs)/60;
+        var mins=time%60;
+
+        if(mins===1&&secs<=5){
+            this.revealMap();
+            document.querySelector('.time').classList.add('blinkRed');
+        }else{
+            document.querySelector('.time').classList.remove('blinkRed');
+            this.hideMap();
+        }
+
+        if(secs<10){
+            secs=`0${secs}`;
+        }
+        if(mins<10){
+            mins=`0${mins}`;
+        }
+
+        document.querySelector('.time').innerHTML=`${mins}:${secs}`;
+    }
     loop(){
         this.ctx.clearRect(
             0,0,
             this.canvas.width,
             this.canvas.height
         );
+
+        this.game.currentTime=new Date();
+        this.setTime();
+
         //Génération de la map :
         for(var i in this.getMap()){
             for(var j in this.getMap()[i]){
-                if(this.getRobot(0).isDead||this.getRobot(1).isDead){
+                if(this.getRobot(0).isDead||this.getRobot(1).isDead||this.reveal){
                     if(this.getMap()[i][j]==-1){
                         this.ctx.fillStyle = "#333";
                     }else{
@@ -154,9 +192,9 @@ class Game {
                     this.ctx.fillRect(j*30,i*30,30,30);
 
                     //placement des armes sur la map
-                    for(var key in this.weapons){
-                        var xWeapon=this.weapons[key].pos.x,
-                            yWeapon=this.weapons[key].pos.y;
+                    for(var key in this.getObj('weapons')){
+                        var xWeapon=this.getSupremVue()[key].x,
+                            yWeapon=this.getSupremVue()[key].y;
                         if(xWeapon==j && yWeapon==i){
                             this.ctx.drawImage(
                                 this.imgs[key],
@@ -181,9 +219,9 @@ class Game {
                                 this.ctx.fillRect(j*30,i*30,30,30);
 
                                 //placement des armes si elles sont dans le champs de vision :
-                                for(var key in this.weapons){
-                                    var xWeapon=this.weapons[key].pos.x,
-                                        yWeapon=this.weapons[key].pos.y;
+                                for(var key in this.getObj('weapons')){
+                                    var xWeapon=this.getSupremVue()[key].x,
+                                        yWeapon=this.getSupremVue()[key].y;
                                     if(xWeapon==j && yWeapon==i){
                                         this.ctx.drawImage(
                                             this.imgs[key],
@@ -279,10 +317,10 @@ class Game {
             }
         }
         supremVue.laser=laser;
-        for(var key in this.weapons){
+        for(var key in this.getObj('weapons')){
             supremVue[key]={
-                x:this.weapons[key].pos.x,
-                y:this.weapons[key].pos.y,
+                x:this.getWeapon(key).pos.x,
+                y:this.getWeapon(key).pos.y,
                 type:'weapon',
                 id:key
             };
@@ -317,6 +355,9 @@ class Game {
     }
     getAllObj(){
         return this.game.obj;
+    }
+    getWeapon(weapon){
+        return this.game.obj.weapons[weapon];
     }
     getState(){
         return this.game.state;
