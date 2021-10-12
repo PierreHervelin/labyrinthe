@@ -556,14 +556,19 @@ class Robot{
                     break;
                 case 'weapon':
                     if(this.cible.fastRoad.length===0){
-                        this.hand.weapon=this.cible.id;
-                        this.hand.damage=this.game.getWeapon(this.cible.id).damage;
-                        this.hand.reach=this.game.getWeapon(this.cible.id).reach;
-                        this.hand.type=this.game.getWeapon(this.cible.id).type;
+                        if(this.game.game.obj.weapons[this.cible.id]){
+                            this.hand.weapon=this.cible.id;
+                            this.hand.damage=this.game.getWeapon(this.cible.id).damage;
+                            this.hand.reach=this.game.getWeapon(this.cible.id).reach;
+                            this.hand.type=this.game.getWeapon(this.cible.id).type;
 
-                        delete this.game.game.obj.weapons[this.cible.id];
-                        this.cible=undefined;
-                        return;
+                            delete this.game.game.obj.weapons[this.cible.id];
+                            this.cible=undefined;
+                            return;
+                        }else{
+                            this.cible=undefined;
+                            return;
+                        }
                     }
                     break;
                 default:
