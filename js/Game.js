@@ -17,7 +17,8 @@ class Game {
             obj:{},
             laser:[],
             state:'init',
-            startTime:new Date()
+            startTime:new Date(),
+            pauseTime:0
         };
 
         //INIT robots
@@ -70,6 +71,7 @@ class Game {
     }
     start(){
         if(this.game.state=='paused'){
+            this.game.pauseTime+=this.game.gameInPauseTime;
             this.game.state='started';
             this.gameloop.robot0=setInterval(()=>{
                 this.getRobot(0).robotStart();
@@ -146,7 +148,7 @@ class Game {
         this.reveal=false;
     }
     setTime(){
-        var time=this.game.currentTime.getTime()-this.game.startTime.getTime();
+        var time=(this.game.currentTime.getTime()-this.game.pauseTime)-this.game.startTime.getTime();
         var ms=time%1000;
         time=(time-ms)/1000;
         var secs=time%60;
@@ -177,8 +179,12 @@ class Game {
             this.canvas.height
         );
 
-        this.game.currentTime=new Date();
-        this.setTime();
+        if(this.getState()==='paused'){
+            this.game.gameInPauseTime=new Date().getTime()-this.game.currentTime.getTime();
+        }else{
+            this.game.currentTime=new Date();
+            this.setTime();
+        }
 
         //Génération de la map :
         for(var i in this.getMap()){
